@@ -1,0 +1,36 @@
+  pool:
+    vmImage: 'windows-latest'
+
+  steps:
+  - task: UseNode@1
+    inputs:
+      version: '14.x'
+
+  - task: Npm@1
+    inputs:
+      command: 'ci'
+      workingDir: 'test-angular-project/test-angular-build/'
+    displayName: 'npm ci (dev)'
+
+  - task: Npm@1
+    inputs:
+      command: 'custom'
+      customCommand: 'run build'
+      workingDir: 'test-angular-project/test-angular-build/'
+    displayName: 'npm run build (dev)'
+
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/test-angular-project/test-angular-build//dist'
+      Contents: |
+        **/**
+        !node_modules/**
+      TargetFolder: '$(build.artifactstagingdirectory)'
+    displayName: 'Copy Files (dev)'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/test-angular-build/'
+      ArtifactName: 'dev'
+      publishLocation: 'Container'
+    displayName: 'Publish Artifacts (dev)'
